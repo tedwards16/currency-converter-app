@@ -1,13 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import 'bootstrap/dist/css/bootstrap.css';
 import './index.css';
 import App from './App';
+import Converter from './Converter';
+import Chart from './Chart';
+import Table from './Table';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <App />
+    <Converter/>
+    <div className='bg-light'>
+      <Chart/>
+      <Table/>
+    </div>
+    <footer>Footer</footer>
   </React.StrictMode>
 );
 
