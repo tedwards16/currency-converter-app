@@ -40,6 +40,6 @@
 .rowC {
   display: flex; 
   flex-direction: row;
-  justify-content: space-around;
-  margin-top: 10px;
+  justify-content: center;
+  margin: 10px;
 }
