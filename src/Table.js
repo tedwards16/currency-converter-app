@@ -2,7 +2,7 @@ import React from "react";
 
 const Table = () => {
     return (
-        <div>Conversion Table</div>
+        <div>Conversion Table Goes Here</div>
     )
 }
 
