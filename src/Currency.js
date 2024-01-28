@@ -7,9 +7,14 @@ class Currency extends React.Component {
     this.state = {
       currency: null,
     }
-  }
+  };
+
 
   componentDidMount () {
+    this.fetchCurrency();
+  }
+
+  fetchCurrency () {
     fetch(`https://api.frankfurter.app/latest`)
       .then(checkStatus)
       .then(json)
