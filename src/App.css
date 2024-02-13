@@ -44,3 +44,7 @@
   margin: 10px;
 }
 
+.conversionTable {
+  display: flex;
+  justify-content: center;
+}

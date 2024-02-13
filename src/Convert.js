@@ -4,33 +4,37 @@ import { json, checkStatus } from "./utils";
 import Dropdown from 'react-dropdown';
 import * as icons from 'react-bootstrap-icons';
 import 'react-dropdown/style.css';
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 
-class CurrencyInput extends React.Component {
-    render() {
-      const { value, handleChange } = this.props;
-      return <input value={value} onChange={handleChange} type="number" defaultValue={1} />
-    }
-  }
   
 const Convert = () => {
 
+    const [currencyRates, setCurrencyRates] = useState([]);
+    const [currencyFrom, setCurrencyFrom] = useState("USD");
+    const [currencyTo, setCurrencyTo] = useState("EUR");
+    const [currencies, setCurrencies] = useState([]);
+    const [fromValue, setFromValue] = useState(1);
+    const [toValue, setToValue] = useState(1);
+
     useEffect(() => {
         fetch(`https://api.frankfurter.app/latest?from=USD`)
-        .then(checkStatus)
-        .then(json)
-        .then((data) => {
-            setCurrencyFrom("USD");
-            setCurrencyTo("EUR");
-            setCurrencyRates(data.rates);
-            getConversionRate();
-            console.log(currencyRates);
-        })}, [])
-
-    const [currencyRates, setCurrencyRates] = useState([]);
-    const [currencyFrom, setCurrencyFrom] = useState();
-    const [currencyTo, setCurrencyTo] = useState();
-    const [currencies, setCurrencies] = useState([]);
-    const [conversionRate, setConversionRate] = useState();
+            .then(checkStatus)
+            .then(json)
+            .then((data) => {
+                setCurrencyFrom("USD");
+                setCurrencyTo("EUR");
+                setCurrencyRates(data.rates);
+                setFromValue(1);
+                setToValue(1);
+                setCurrencies(Object.keys(data.rates));
+                
+            });
+            convertFromTo();
+    }, []);
+    
+    useEffect(() => {
+        fetchCurrency();
+    }, [currencyFrom, currencyTo]);
 
     function fetchCurrency() {
         fetch(`https://api.frankfurter.app/latest?from=${currencyFrom}`)
@@ -44,30 +48,55 @@ const Convert = () => {
     useEffect(() => {
         const baseOptions =  Object.keys(currencyRates);
         setCurrencies(baseOptions);
-    }, [currencyRates]);
+    }, [currencyFrom]);
 
-    function getConversionRate() {
+    useEffect(() => {
+        convertFromTo();
+    }, [fromValue, currencyFrom, currencyTo]);
+
+    useEffect(() => {
+        convertToFrom();
+    }, []);
+    function convertFromTo() {
         const rate = currencyRates[currencyTo];
-        console.log(rate);
+        const convertedValue = fromValue * rate;
+        setToValue(convertedValue.toFixed(2));
+    }
+
+    function convertToFrom() {
+        const rate = currencyRates[currencyTo];
+        const convertedValue = toValue / rate;
+        setFromValue(convertedValue.toFixed(2));
     }
 
     function handleCurrencyFromChange(option) {
         setCurrencyFrom(option.value);
         fetchCurrency();
-        getConversionRate();
+        convertFromTo();
     }
 
     function handleCurrencyToChange(option) {
         setCurrencyTo(option.value);
-        getConversionRate();
+        fetchCurrency();
+        convertFromTo();
         
     }
 
     function reverse () {
-        setCurrencyFrom(currencyTo);
         setCurrencyTo(currencyFrom);
-        fetchCurrency();
-        getConversionRate();
+        setCurrencyFrom(currencyTo);
+        setFromValue(toValue);
+        
+    }
+
+    function handleInputFromChange (value) {
+        setFromValue(value);
+        convertFromTo();
+    }
+
+    function handleInputToChange (value) {
+        setToValue(value);
+        convertToFrom();
     }
 
     return (
@@ -79,7 +108,7 @@ const Convert = () => {
                     value={currencyFrom}
                     onChange={handleCurrencyFromChange}
                     />
-                    <CurrencyInput/>
+                    <input value={fromValue} id='from' onChange={(e) => handleInputFromChange(e.target.value)} type="number"/>
                 </div>
                 <div>
                     <Dropdown
@@ -87,7 +116,7 @@ const Convert = () => {
                     value={currencyTo}
                     onChange={handleCurrencyToChange}
                     />
-                    <CurrencyInput/>
+                      <input value={toValue} id='to' onChange={(e) => handleInputToChange(e.target.value)} type="number"/>
                 </div>
             </div>
 
@@ -95,6 +124,39 @@ const Convert = () => {
                 <icons.ArrowLeftRight/>
             </button>
             <div>
+            <Tabs>
+                <TabList>
+                    <Tab>
+                        Exchange Rate Chart for {currencyFrom}
+
+                    </Tab>
+                    <Tab>
+                        Conversion Table for {currencyFrom}
+                    </Tab>
+                </TabList>
+                <TabPanel>
+                </TabPanel>
+                <TabPanel>
+                    <div className="conversionTable"> 
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Currency</th>
+                                <th>Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {Object.entries(currencyRates).map(([currency, rate]) => (
+                                <tr key={currency}>
+                                    <td>{currency}</td>
+                                    <td>{rate}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    </div>
+                </TabPanel>
+            </Tabs>
             </div>
         </div>
     )
